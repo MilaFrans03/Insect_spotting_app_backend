@@ -9,9 +9,12 @@ const pictureSchema = new mongoose.Schema({
 });
 
 const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  pictures: [pictureSchema],
+  username:  { type: String, required: true },
+  name:      { type: String, required: true },
+  email:     { type: String, required: true },
+  password:  { type: String, required: true }, // normally, passwords should be hashed!
   createdAt: { type: Date, default: Date.now },
+  pictures: [pictureSchema],
 });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);

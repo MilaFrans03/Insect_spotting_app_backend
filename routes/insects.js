@@ -1,5 +1,7 @@
 import express from 'express';
+
 import Insect from '../models/Insect.js'; // pas pad aan naar waar jouw model staat
+
 
 const router = express.Router();
 

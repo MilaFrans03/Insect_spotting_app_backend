@@ -3,105 +3,85 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
-/** CREATE — nieuwe gebruiker aanmaken */
-router.post('/', async (req, res) => {
-try {
-const user = new User(req.body);
-await user.save();
-res.status(201).json(user);
-} catch (err) {
-console.error(err);
-res.status(400).json({ error: err.message });
-}
-});
-
-/** READ ALL — alle gebruikers ophalen */
+// GET: Retrieve all users
 router.get('/', async (req, res) => {
-try {
-const users = await User.find();
-res.status(200).json(users);
-} catch (err) {
-console.error(err);
-res.status(500).json({ error: err.message });
-}
+  // get all users
+  const users = await User.find();
+
+  res.json(users);
 });
 
-/** READ ONE — specifieke gebruiker ophalen */
+// GET: Retrieve a user ID by email
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body; // normally, passwords should be hashed!
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email body parameter is required' });
+  }
+
+  try {
+    const user = await User.findOne({ email, password });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.json({ id: user._id.toString() });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error retrieving user', error: error.message });
+  }
+});
+
+// GET: Retreive one user by ID
 router.get('/:id', async (req, res) => {
-try {
-const user = await User.findById(req.params.id);
-if (!user) return res.status(404).json({ error: 'User not found' });
-res.status(200).json(user);
-} catch (err) {
-console.error(err);
-res.status(500).json({ error: err.message });
-}
+  const { id } = req.params; // == req.params.id;
+  const user = await User.findById(id);
+  res.json(user);
+}); 
+
+// POST: Add a new user
+router.post('/', async (req, res) => {
+  try {
+    const newUser = new User(req.body); // Create a new instance of User model
+    await newUser.save(); // Save to MongoDB
+    res.status(201).json({ user: 'User added successfully!', userData: newUser });
+  } catch (error) {
+    res.status(500).json({ user: 'Error adding user', error: error.user });
+  }
 });
 
-/** UPDATE — gebruiker wijzigen */
+// PUT: Update an existing user
 router.put('/:id', async (req, res) => {
-try {
-const updated = await User.findByIdAndUpdate(
-req.params.id,
-{ $set: req.body },
-{ new: true, runValidators: true, context: 'query' }
-);
-if (!updated) return res.status(404).json({ error: 'User not found' });
-res.status(200).json(updated);
-} catch (err) {
-console.error(err);
-res.status(400).json({ error: err.message });
-}
+  const { id } = req.params; // Get the user ID from params
+  const updatedUser = req.body; // Get the new user data from request body
+  
+  try {
+    const user = await User.findByIdAndUpdate(id, updatedUser, { new: true });
+    if (user) {
+      res.json({ user: 'User updated successfully!', userData: user });
+    } else {
+      res.status(404).json({ user: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ user: 'Error updating user', error: error.user });
+  }
 });
 
-/** DELETE — gebruiker verwijderen */
+// DELETE: Remove a user by ID
 router.delete('/:id', async (req, res) => {
-try {
-const deleted = await User.findByIdAndDelete(req.params.id);
-if (!deleted) return res.status(404).json({ error: 'User not found' });
-res.status(200).json({ message: 'User removed', id: deleted._id });
-} catch (err) {
-console.error(err);
-res.status(500).json({ error: err.message });
-}
+  const { id } = req.params; 
+  
+  try {
+    const user = await User.findByIdAndDelete(id); // Find the user by ID and delete it
+    if (user) {
+      res.json({ user: 'User deleted successfully!' });
+    } else {
+      res.status(404).json({ user: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ user: 'Error deleting user', error: error.user });
+  }
 });
 
-/** ADD PICTURE — foto toevoegen aan pictures array */
-router.post('/:id/pictures', async (req, res) => {
-try {
-const user = await User.findById(req.params.id);
-if (!user) return res.status(404).json({ error: 'User not found' });
-
-```
-user.pictures.push(req.body); // body: { insect_id, photo_url, in_collection, date_found }
-await user.save();
-
-res.status(201).json(user);
-```
-
-} catch (err) {
-console.error(err);
-res.status(400).json({ error: err.message });
-}
-});
-
-/** REMOVE PICTURE — foto verwijderen uit pictures array */
-router.delete('/:id/pictures/:picId', async (req, res) => {
-try {
-const user = await User.findById(req.params.id);
-if (!user) return res.status(404).json({ error: 'User not found' });
-
-```
-user.pictures.id(req.params.picId)?.remove();
-await user.save();
-
-res.status(200).json(user);
-```
-
-} catch (err) {
-console.error(err);
-res.status(500).json({ error: err.message });
-}
-});
 
 export default router;
