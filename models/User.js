@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const pictureSchema = new mongoose.Schema({
-  insect_id: { type: String, ref: 'Insect', required: true },
+  insect_id: { type: String, required: true }, 
   photo_url: { type: String, required: true },
   uploaded_at: { type: Date, default: Date.now },
   in_collection: { type: Boolean, default: false }, // nieuw veld
@@ -9,6 +9,7 @@ const pictureSchema = new mongoose.Schema({
 });
 
 const userSchema = new mongoose.Schema({
+
   username:  { type: String, required: true },
   name:      { type: String, required: true },
   email:     { type: String, required: true },
