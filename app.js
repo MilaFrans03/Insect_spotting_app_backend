@@ -1,7 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import testRoute from './routes/test.js';
 import indexRoute from './routes/index.js';
 import insectsRoute from './routes/insects.js';
 import usersRoute from './routes/users.js';
